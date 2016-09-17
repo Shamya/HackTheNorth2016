@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Hack The North 2016</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <style>
+      #map {
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="jumbotron" id="map"></div>
+    <div class="panel panel-default">
+      <div class="panel-heading">Select the number corresponding to your anxiety/stress level. 1 is lowest, 10 is highest.</div>
+      <div class="panel-body">
+        <div class="btn-group" data-toggle="buttons">
+          <label class="btn btn-primary active"><input type="radio" name="options" id="option1" autocomplete="off" checked>1</label>
+          <label class="btn btn-primary"><input type="radio" name="options" id="option2" autocomplete="off">2</label>
+          <label class="btn btn-success"><input type="radio" name="options" id="option3" autocomplete="off">3</label>
+          <label class="btn btn-success"><input type="radio" name="options" id="option4" autocomplete="off">4</label>
+          <label class="btn btn-info"><input type="radio" name="options" id="option5" autocomplete="off">5</label>
+          <label class="btn btn-info"><input type="radio" name="options" id="option6" autocomplete="off">6</label>
+          <label class="btn btn-warning"><input type="radio" name="options" id="option7" autocomplete="off">7</label>
+          <label class="btn btn-warning"><input type="radio" name="options" id="option8" autocomplete="off">8</label>
+          <label class="btn btn-danger"><input type="radio" name="options" id="option9" autocomplete="off">9</label>
+          <label class="btn btn-danger"><input type="radio" name="options" id="option10" autocomplete="off">10</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="well">Hack The North 2016</div>
+    <script>
+      var map;
+      function initMap() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+            var pos = {
+              lat: 36.1731948,
+              lng: -115.1435535
+            }
+            console.log('fixed location',pos.lat, pos.lng);
+
+            var datafile = new XMLHttpRequest();
+            var datafileURL = 'https://www.airmanopus.net/hackthenorth2016/biz_vegas2.json';
+            datafile.addEventListener('load', datafileComplete, false);
+            datafile.open('GET',datafileURL,true);
+            datafile.send();
+
+            function datafileComplete() {
+              // todo these coordinates come from the yelp reviews
+              // see https://developers.google.com/maps/documentation/javascript/heatmaplayer
+              var heatmapData = [];
+              var dataJSON = JSON.parse(datafile.responseText);
+              console.log(dataJSON);
+              var numDataPoints = dataJSON.length;
+              var gradient = [
+                'rgba(0, 255, 255, 0)',
+                'rgba(0, 255, 255, 1)',
+                'rgba(0, 191, 255, 1)',
+                'rgba(0, 127, 255, 1)',
+                'rgba(0, 63, 255, 1)',
+                'rgba(0, 0, 255, 1)',
+                'rgba(0, 0, 223, 1)',
+                'rgba(0, 0, 191, 1)',
+                'rgba(0, 0, 159, 1)',
+                'rgba(0, 0, 127, 1)',
+                'rgba(63, 0, 91, 1)',
+                'rgba(127, 0, 63, 1)',
+                'rgba(191, 0, 31, 1)',
+                'rgba(255, 0, 0, 1)'
+              ];
+              for (var i = 0; i < numDataPoints; i++) {
+                var dataPointObj = new google.maps.LatLng(dataJSON[i].latitude, dataJSON[i].longitude);
+                heatmapData.push(dataPointObj);
+              }  
+
+              var currentPosition = new google.maps.LatLng(pos.lat, pos.lon);
+              map = new google.maps.Map(document.getElementById('map'), {
+                center: currentPosition,
+                zoom: 13,
+                mapTypeId: 'satellite'
+              });
+              var heatmap = new google.maps.visualization.HeatmapLayer({
+                data: heatmapData
+              });
+              heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+              heatmap.setMap(map);
+          
+              var marker = new google.maps.Marker({
+                  position: pos,
+                  title:"You are here"
+              });
+              marker.setMap(map);
+              map.setCenter(pos);
+            }
+          });
+        }  
+      }  
+
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAVD_45XuHCecp0yWX3tpaWr5Jy6o4YyaI&callback=initMap&libraries=visualization" async defer></script>
+  </body>
+</html>
