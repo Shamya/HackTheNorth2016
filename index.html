@@ -13,34 +13,62 @@
     <style>
       #map {
         width: 100%;
-        height: 75%;
       }
     </style>
+
+    <script src="https://www.gstatic.com/firebasejs/3.4.0/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyBDFiIIpfbUVq1zs2zHu6syT7_G41LPTsI",
+        authDomain: "hackthenorth2016-80845.firebaseapp.com",
+        databaseURL: "https://hackthenorth2016-80845.firebaseio.com",
+        storageBucket: "hackthenorth2016-80845.appspot.com",
+        messagingSenderId: "461741050868"
+      };
+      firebase.initializeApp(config);
+      var database = firebase.database();
+    </script>
   </head>
   <body>
     <div class="embed-responsive embed-responsive-4by3"><div id="map" class="embed-responsive-item"></div> </div>
     <div class="panel panel-default">
-      <div class="panel-heading">Select the number corresponding to your anxiety/stress level. 1 is lowest, 10 is highest. Your rating will be added to historical ratings for this location.</div>
+      <div class="panel-heading">This map shows locations where people may have expressed anxiety or fear (shown in shades of red) and locations where crimes have been reported in the past (shown in shades of purple). The presence of these colors at a location on the map does not mean that danger is occurring or imminent, but it can indicate that the environment may contain one or more triggers. Areas that do not show indicators may still not be safe so remain aware of your surroundings.</div>
       <div class="panel-body">
-        <div class="btn-group" data-toggle="buttons">
-          <label class="btn btn-primary active"><input type="radio" name="options" id="option1" autocomplete="off" checked>1</label>
-          <label class="btn btn-primary"><input type="radio" name="options" id="option2" autocomplete="off">2</label>
-          <label class="btn btn-success"><input type="radio" name="options" id="option3" autocomplete="off">3</label>
-          <label class="btn btn-success"><input type="radio" name="options" id="option4" autocomplete="off">4</label>
-          <label class="btn btn-info"><input type="radio" name="options" id="option5" autocomplete="off">5</label>
-          <label class="btn btn-info"><input type="radio" name="options" id="option6" autocomplete="off">6</label>
-          <label class="btn btn-warning"><input type="radio" name="options" id="option7" autocomplete="off">7</label>
-          <label class="btn btn-warning"><input type="radio" name="options" id="option8" autocomplete="off">8</label>
-          <label class="btn btn-danger"><input type="radio" name="options" id="option9" autocomplete="off">9</label>
-          <label class="btn btn-danger"><input type="radio" name="options" id="option10" autocomplete="off">10</label>
-        </div>
+        <p>Select one of the buttons below to anonymously record your feelings of anxiety or stress at your current location. Your input will be used to adjust the data that is shown on the map for this location.</p>
+        <button type="button" id="less" class="btn btn-success" data-toggle="button" aria-pressed="false" autocomplete="off" data-complete-text="Updated!">
+            Less Anxious
+        </button>
+        <button type="button" id="more" class="btn btn-warning" data-toggle="button" aria-pressed="false" autocomplete="off" data-complete-text="Updated!">
+            More Anxious
+        </button>
+        <button type="button" id="very" class="btn btn-danger" data-toggle="button" aria-pressed="false" autocomplete="off" data-complete-text="Updated!">
+            Very Anxious
+        </button>
       </div>
     </div>
-
-    <div class="well">Hack The North 2016</div>
+    <div class="well well-sm"><a href="https://www.yelp.ca/developers/"><img src="https://airmanopus.net/hackthenorth2016/images/yelp_btn/yelp_powered_btn_light.png" alt="Powered by Yelp" border="0"></div>
+    <div class="well well-sm"><a href="https://www.ibm.com/watson/developercloud/alchemy-language.html">Powered by IBM Watson Developer Cloud/AlchemyLanguage</a></div>
+    <div class="well well-sm">Made with <span class="glyphicon glyphicon-heart" aria-hidden="true"></span> at <a href="https://hackthenorth.com/">Hack the North</a>.</div>
     <script>
+      $('#less').on('click', function () {
+        $(this).button('complete') 
+      })
+      $('#more').on('click', function () {
+        $(this).button('complete')
+      })
+      $('#very').on('click', function () {
+        $(this).button('complete') 
+      })
+
+      function updateLocationReport() {
+      
+      }
+
       var map;
+
       function initMap() {
+        console.log('function initMap');
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(function(position) {
             var pos = {
@@ -49,15 +77,15 @@
             };
             // TODO test, remove me
             var pos = {
-              lat: 36.1731948,
-              lng: -115.1435535
+              lat: 36.1126264,
+              lng: -115.1788992
             }
             console.log('fixed location',pos.lat, pos.lng);
             //
             var currentPosition = new google.maps.LatLng(pos.lat, pos.lon);
             map = new google.maps.Map(document.getElementById('map'), {
               center: currentPosition,
-              zoom: 13,
+              zoom: 11,
               mapTypeId: 'hybrid'
             });
             
@@ -82,24 +110,20 @@
             crimeFile.send();
             
             function yelpFileComplete() {
+              console.log('function yelpFileComplete');
               var heatmapData = [];
               var yelpJSON = JSON.parse(yelpFile.responseText);
               var numDataPoints = yelpJSON.length;
               var gradient = [
-                'rgba(0, 255, 255, 0)',
-                'rgba(0, 255, 255, 1)',
-                'rgba(0, 191, 255, 1)',
-                'rgba(0, 127, 255, 1)',
-                'rgba(0, 63, 255, 1)',
-                'rgba(0, 0, 255, 1)',
-                'rgba(0, 0, 223, 1)',
-                'rgba(0, 0, 191, 1)',
-                'rgba(0, 0, 159, 1)',
-                'rgba(0, 0, 127, 1)',
-                'rgba(63, 0, 91, 1)',
-                'rgba(127, 0, 63, 1)',
-                'rgba(191, 0, 31, 1)',
-                'rgba(255, 0, 0, 1)'
+                'rgba(255, 160, 122, 0)',
+                'rgba(250,128,114, 0)',
+                'rgba(233, 150, 122, 0)',
+                'rgba(240, 128, 128, 1)',
+                'rgba(205, 92, 92, 1)',
+                'rgba(220, 20, 60, 1)',
+                'rgba(178, 34, 34, 1)',
+                'rgba(255, 0, 0, 1)',
+                'rgba(139, 0, 0, 1)'
               ];
 
               for (var i = 0; i < numDataPoints; i++) {
@@ -107,46 +131,42 @@
                 heatmapData.push(dataPointObj);
               }  
 
-
-
               var heatmap = new google.maps.visualization.HeatmapLayer({
                 data: heatmapData
               });
-              //heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+              heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
               heatmap.setMap(map);
+
+              console.log('functon yelpFileComplete finished');
             }
 
             function crimeFileComplete() {
+              console.log('function crimeFileComplete');
               var heatmapData = [];
               var crimeJSON = JSON.parse(crimeFile.responseText);
               var crimeCount = crimeJSON.length;
               var gradient = [
-                'rgba(0, 255, 255, 0)',
-                'rgba(0, 255, 255, 1)',
-                'rgba(0, 191, 255, 1)',
-                'rgba(0, 127, 255, 1)',
-                'rgba(0, 63, 255, 1)',
-                'rgba(0, 0, 255, 1)',
-                'rgba(0, 0, 223, 1)',
-                'rgba(0, 0, 191, 1)',
-                'rgba(0, 0, 159, 1)',
-                'rgba(0, 0, 127, 1)',
-                'rgba(63, 0, 91, 1)',
-                'rgba(127, 0, 63, 1)',
-                'rgba(191, 0, 31, 1)',
-                'rgba(255, 0, 0, 1)'
+                'rgba(255, 0, 255, 0)',
+                'rgba(186, 85, 211, 0)',
+                'rgba(147, 112, 219, 0)',
+                'rgba(138, 43, 226, 1)',
+                'rgba(148, 0, 211, 1)',
+                'rgba(153, 50, 204, 1)',
+                'rgba(139, 0, 139, 1)',
+                'rgba(128, 0, 128, 1)',
+                'rgba(75, 0, 130, 1)'
               ];
               for (var j = 0; j < crimeCount; j++) {
-                var dataPointObj = new google.maps.LatLng(crimeJSON[j].fields.loc.coordinates[1], crimeJSON[j].fields.loc.coordinates[0]);
-                console.log(crimeJSON[j].fields.loc.coordinates[1], crimeJSON[j].fields.loc.coordinates[0]);
+                var dataPointObj = new google.maps.LatLng(crimeJSON[j].fields.lat, crimeJSON[j].fields.lng);
                 heatmapData.push(dataPointObj);
               }
               var heatmap = new google.maps.visualization.HeatmapLayer({
                 data: heatmapData,
-                opacity: 0.2
+                opacity: 0.3
               });
               heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
               heatmap.setMap(map);
+              console.log('function crimeFileComplete finished');
             }
           });
         }  
