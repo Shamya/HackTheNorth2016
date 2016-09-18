@@ -1,5 +1,9 @@
 From our project description on Devpost
 
+Working prototype with data for Las Vegas NV is available here:
+
+https://www.airmanopus.net/hackthenorth2016/
+
 ## Inspiration
 
 There are a number of different symptoms and treatment strategies for Post Traumatic Stress Disorder (PTSD); while a full description of each is beyond the scope of this project, one of the hardest symptoms to overcome is that of avoidance. It is often easier to avoid a potential or triggering environment than to face it, but facing triggers is ultimately the only way to diminish their importance (as well as the problems avoidance causes). 
