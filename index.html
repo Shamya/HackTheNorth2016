@@ -1,0 +1,177 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Hack The North 2016</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <style>
+      #map {
+        width: 100%;
+      }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/3.4.0/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyBDFiIIpfbUVq1zs2zHu6syT7_G41LPTsI",
+        authDomain: "hackthenorth2016-80845.firebaseapp.com",
+        databaseURL: "https://hackthenorth2016-80845.firebaseio.com",
+        storageBucket: "hackthenorth2016-80845.appspot.com",
+        messagingSenderId: "461741050868"
+      };
+      firebase.initializeApp(config);
+      var database = firebase.database();
+    </script>
+  </head>
+  <body>
+    <div class="embed-responsive embed-responsive-4by3"><div id="map" class="embed-responsive-item"></div> </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">This map shows locations where people may have expressed anxiety or fear (shown in shades of red) and locations where crimes have been reported in the past (shown in shades of purple). The presence of these colors at a location on the map does not mean that danger is occurring or imminent, but it can indicate that the environment may contain one or more triggers. Areas that do not show indicators may still not be safe so remain aware of your surroundings.</div>
+      <div class="panel-body">
+        <p>Select one of the buttons below to anonymously record your feelings of anxiety or stress at your current location. Your input will be used to adjust the data that is shown on the map for this location.</p>
+        <button type="button" id="less" class="btn btn-success" data-toggle="button" aria-pressed="false" autocomplete="off" data-complete-text="Updated!">
+            Less Anxious
+        </button>
+        <button type="button" id="more" class="btn btn-warning" data-toggle="button" aria-pressed="false" autocomplete="off" data-complete-text="Updated!">
+            More Anxious
+        </button>
+        <button type="button" id="very" class="btn btn-danger" data-toggle="button" aria-pressed="false" autocomplete="off" data-complete-text="Updated!">
+            Very Anxious
+        </button>
+      </div>
+    </div>
+    <div class="well well-sm"><a href="https://www.yelp.ca/developers/"><img src="https://airmanopus.net/hackthenorth2016/images/yelp_btn/yelp_powered_btn_light.png" alt="Powered by Yelp" border="0"></div>
+    <div class="well well-sm"><a href="https://www.ibm.com/watson/developercloud/alchemy-language.html">Powered by IBM Watson Developer Cloud/AlchemyLanguage</a></div>
+    <div class="well well-sm">Made with <span class="glyphicon glyphicon-heart" aria-hidden="true"></span> at <a href="https://hackthenorth.com/">Hack the North</a>.</div>
+    <script>
+      $('#less').on('click', function () {
+        $(this).button('complete') 
+      })
+      $('#more').on('click', function () {
+        $(this).button('complete')
+      })
+      $('#very').on('click', function () {
+        $(this).button('complete') 
+      })
+
+      function updateLocationReport() {
+      
+      }
+
+      var map;
+
+      function initMap() {
+        console.log('function initMap');
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+            // TODO test, remove me
+            var pos = {
+              lat: 36.1126264,
+              lng: -115.1788992
+            }
+            console.log('fixed location',pos.lat, pos.lng);
+            //
+            var currentPosition = new google.maps.LatLng(pos.lat, pos.lon);
+            map = new google.maps.Map(document.getElementById('map'), {
+              center: currentPosition,
+              zoom: 11,
+              mapTypeId: 'hybrid'
+            });
+            
+            var marker = new google.maps.Marker({
+                position: pos,
+                title:"You are here"
+            });
+            
+            marker.setMap(map);
+            map.setCenter(pos);
+            
+            var yelpFile = new XMLHttpRequest();
+            var yelpFileURL = 'https://www.airmanopus.net/hackthenorth2016/biz_vegas2.json';
+            yelpFile.addEventListener('load', yelpFileComplete, false);
+            yelpFile.open('GET',yelpFileURL,true);
+            yelpFile.send();
+
+            var crimeFile = new XMLHttpRequest();
+            var crimeFileURL = 'https://www.airmanopus.net/hackthenorth2016/las-vegas-crime-data.json';
+            crimeFile.addEventListener('load', crimeFileComplete, false);
+            crimeFile.open('GET',crimeFileURL,true);
+            crimeFile.send();
+            
+            function yelpFileComplete() {
+              console.log('function yelpFileComplete');
+              var heatmapData = [];
+              var yelpJSON = JSON.parse(yelpFile.responseText);
+              var numDataPoints = yelpJSON.length;
+              var gradient = [
+                'rgba(255, 160, 122, 0)',
+                'rgba(250,128,114, 0)',
+                'rgba(233, 150, 122, 0)',
+                'rgba(240, 128, 128, 1)',
+                'rgba(205, 92, 92, 1)',
+                'rgba(220, 20, 60, 1)',
+                'rgba(178, 34, 34, 1)',
+                'rgba(255, 0, 0, 1)',
+                'rgba(139, 0, 0, 1)'
+              ];
+
+              for (var i = 0; i < numDataPoints; i++) {
+                var dataPointObj = new google.maps.LatLng(yelpJSON[i].latitude, yelpJSON[i].longitude, yelpJSON[i].fear);
+                heatmapData.push(dataPointObj);
+              }  
+
+              var heatmap = new google.maps.visualization.HeatmapLayer({
+                data: heatmapData
+              });
+              heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+              heatmap.setMap(map);
+
+              console.log('functon yelpFileComplete finished');
+            }
+
+            function crimeFileComplete() {
+              console.log('function crimeFileComplete');
+              var heatmapData = [];
+              var crimeJSON = JSON.parse(crimeFile.responseText);
+              var crimeCount = crimeJSON.length;
+              var gradient = [
+                'rgba(255, 0, 255, 0)',
+                'rgba(186, 85, 211, 0)',
+                'rgba(147, 112, 219, 0)',
+                'rgba(138, 43, 226, 1)',
+                'rgba(148, 0, 211, 1)',
+                'rgba(153, 50, 204, 1)',
+                'rgba(139, 0, 139, 1)',
+                'rgba(128, 0, 128, 1)',
+                'rgba(75, 0, 130, 1)'
+              ];
+              for (var j = 0; j < crimeCount; j++) {
+                var dataPointObj = new google.maps.LatLng(crimeJSON[j].fields.lat, crimeJSON[j].fields.lng);
+                heatmapData.push(dataPointObj);
+              }
+              var heatmap = new google.maps.visualization.HeatmapLayer({
+                data: heatmapData,
+                opacity: 0.3
+              });
+              heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+              heatmap.setMap(map);
+              console.log('function crimeFileComplete finished');
+            }
+          });
+        }  
+      }  
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAVD_45XuHCecp0yWX3tpaWr5Jy6o4YyaI&callback=initMap&libraries=visualization" async defer></script>
+  </body>
+</html>
